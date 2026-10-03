@@ -106,9 +106,20 @@ solarGroup.visible=false;
 // galaxy points
 const pts=[];for(let i=0;i<7000;i++){const arm=i%4;const r=Math.pow(Math.random(),.62)*28;const angle=r*.43+arm*Math.PI/2+(Math.random()-.5)*.7;const y=(Math.random()-.5)*Math.max(.25,2.1-r*.055);pts.push(Math.cos(angle)*r,y,Math.sin(angle)*r)}
 const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
-const galPts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xbec7ff,size:.09,sizeAttenuation:true,transparent:true,opacity:.88}));galaxyGroup.add(galPts);
-const core=mesh(new THREE.SphereGeometry(2.2,32,32),new THREE.MeshBasicMaterial({color:0xfff1c2,transparent:true,opacity:.55}),galaxyGroup);
-galaxyGroup.rotation.x=.42;galaxyGroup.rotation.z=-.18;galaxyGroup.visible=false;
+const galPts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xd9e0ff,size:.16,sizeAttenuation:true,transparent:true,opacity:1}));galaxyGroup.add(galPts);
+const core=mesh(new THREE.SphereGeometry(3.0,40,40),new THREE.MeshBasicMaterial({color:0xfff0b0,transparent:true,opacity:.82}),galaxyGroup);
+const galGlow=mesh(new THREE.SphereGeometry(7,40,40),new THREE.MeshBasicMaterial({color:0x6f78ff,transparent:true,opacity:.10,depthWrite:false}),galaxyGroup);
+galaxyGroup.rotation.x=.18;galaxyGroup.rotation.z=-.18;galaxyGroup.visible=false;
+
+// symbolic cosmic paper stack + reference markers
+const cosmicGroup=new THREE.Group();world.add(cosmicGroup);cosmicGroup.visible=false;
+const beamMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.95});
+const beam=mesh(new THREE.BoxGeometry(.65,12,.65),beamMat,cosmicGroup);beam.position.y=0;
+const beamGlow=mesh(new THREE.BoxGeometry(1.5,12,1.5),new THREE.MeshBasicMaterial({color:0x90a5ff,transparent:true,opacity:.12,depthWrite:false}),cosmicGroup);
+const starA=mesh(new THREE.SphereGeometry(.42,32,32),new THREE.MeshBasicMaterial({color:0xffdf7d}),cosmicGroup);starA.position.set(-7,-3,0);
+const starB=mesh(new THREE.SphereGeometry(.42,32,32),new THREE.MeshBasicMaterial({color:0xa9c7ff}),cosmicGroup);starB.position.set(7,3,0);
+const starGlowA=mesh(new THREE.SphereGeometry(1.0,32,32),new THREE.MeshBasicMaterial({color:0xffb43e,transparent:true,opacity:.18,depthWrite:false}),cosmicGroup);starGlowA.position.copy(starA.position);
+const starGlowB=mesh(new THREE.SphereGeometry(1.0,32,32),new THREE.MeshBasicMaterial({color:0x6fa1ff,transparent:true,opacity:.18,depthWrite:false}),cosmicGroup);starGlowB.position.copy(starB.position);
 
 // paper stack
 const paperGroup=new THREE.Group();world.add(paperGroup);
@@ -128,12 +139,13 @@ function getStage(m,mm){if(mm<3)return mm<.4?0:1;if(m<.4)return 2;if(m<3)return 
 function compare(m,mm){if(mm<.4)return '仍是一张很薄的纸。';if(mm<3)return '接近一枚硬币的厚度。';if(m<.4)return '接近一本书。';if(m<3)return '接近人的身高。';if(m<100)return '进入建筑尺度。';if(m<8849)return '正在逼近珠穆朗玛峰。';if(m<MOON)return '进入行星尺度。';if(m<AU)return '已经超过地月距离。';if(m<LY)return '超过地日距离，进入太阳系尺度。';const x=m/LY;if(x<1e5)return '约 '+x.toLocaleString('zh-CN',{maximumFractionDigits:2})+' 光年。';if(x<1e9)return '约 '+(x/1e6).toFixed(2)+' 百万光年。';return '约 '+(x/1e9).toFixed(2)+' 十亿光年。'}
 
 function updateVisibility(s){
- [localGroup,cityGroup,earthGroup,solarGroup,galaxyGroup].forEach(g=>g.visible=false);
+ [localGroup,cityGroup,earthGroup,solarGroup,galaxyGroup,cosmicGroup].forEach(g=>g.visible=false);
  if(s<=3)localGroup.visible=true;
  else if(s===4)cityGroup.visible=true;
  else if(s===5)earthGroup.visible=true;
  else if(s===6)solarGroup.visible=true;
- else galaxyGroup.visible=true;
+ else if(s===7){galaxyGroup.visible=true;cosmicGroup.visible=true}
+ else {galaxyGroup.visible=true;cosmicGroup.visible=true}
 }
 function updateScene(){
  const layers=2**folds,mm=PAPER_MM*layers,m=mm/1000;
@@ -143,7 +155,10 @@ function updateScene(){
  document.getElementById('layers').textContent=folds<53?Math.round(layers).toLocaleString('zh-CN')+' 层':layers.toExponential(3)+' 层';
  document.getElementById('compare').textContent=compare(m,mm);
  document.getElementById('slider').value=folds;
- const L=labels[stage];document.getElementById('scaleTag').innerHTML='<b>'+L[0]+'</b><br>'+L[1];
+ let L=labels[stage];
+ if(stage===7) L=['恒星际尺度','白色光柱代表纸堆理论厚度；两颗亮星用于表现数光年的距离。'];
+ if(stage>=8) L=['银河系尺度','白色光柱代表纸堆理论厚度；背景亮盘代表银河系尺度。'];
+ document.getElementById('scaleTag').innerHTML='<b>'+L[0]+'</b><br>'+L[1];
 
  // physical folding footprint for first folds; logarithmic thickness afterwards
  let w=2.1,d=2.97;
@@ -152,8 +167,17 @@ function updateScene(){
  const visualThickness=.03+Math.min(2.6,Math.log10(1+mm)*.34);
  paper.scale.set(w/2.1,visualThickness/.03,d/2.97);
  paper.position.y=visualThickness/2;
- paperGroup.visible=stage<=4;
- paperGroup.scale.setScalar(stage===4?.22:1);
+ paperGroup.visible=stage<=6;
+ paperGroup.scale.setScalar(stage===4?.22:(stage>=5?.18:1));
+
+ // In cosmic stages the white beam is a symbolic "paper thickness" ruler.
+ if(stage>=7){
+   cosmicGroup.visible=true;
+   const cosmicLen = stage===7 ? 10 : 16;
+   beam.scale.y = cosmicLen/12;
+   beamGlow.scale.y = cosmicLen/12;
+   starA.visible=starB.visible=starGlowA.visible=starGlowB.visible=(stage===7);
+ }
 
  // camera choreography
  if(stage===0){targetCam.set(0,3.25,6.3);camLook.set(0,0,0)}
@@ -163,7 +187,8 @@ function updateScene(){
  if(stage===4){targetCam.set(0,15,23);camLook.set(0,1,0)}
  if(stage===5){targetCam.set(0,5.5,17);camLook.set(0,0,0)}
  if(stage===6){targetCam.set(0,8,28);camLook.set(0,0,0)}
- if(stage>=7){targetCam.set(0,23,42);camLook.set(0,0,0)}
+ if(stage===7){targetCam.set(0,4.5,24);camLook.set(0,0,0)}
+ if(stage>=8){targetCam.set(0,8,34);camLook.set(0,0,0)}
  document.getElementById('fold').disabled=folds>=100;
 }
 function setFold(n,flash=true){folds=Math.max(0,Math.min(100,+n));updateScene();if(flash){const f=document.getElementById('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}}
@@ -175,7 +200,7 @@ document.getElementById('auto').onclick=()=>{if(timer){clearInterval(timer);time
 function resize(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();
 updateScene();camera.position.copy(targetCam);
 const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const dt=Math.min(.05,clock.getDelta());camera.position.lerp(targetCam,1-Math.pow(.0005,dt));camera.lookAt(camLook);coin.rotation.z+=dt*.18;earth.rotation.y+=dt*.08;tinyEarth.position.set(Math.cos(performance.now()*.00015)*14,0,Math.sin(performance.now()*.00015)*14);galaxyGroup.rotation.y+=dt*.018;renderer.render(scene,camera)}animate();
+function animate(){requestAnimationFrame(animate);const dt=Math.min(.05,clock.getDelta());camera.position.lerp(targetCam,1-Math.pow(.0005,dt));camera.lookAt(camLook);coin.rotation.z+=dt*.18;earth.rotation.y+=dt*.08;tinyEarth.position.set(Math.cos(performance.now()*.00015)*14,0,Math.sin(performance.now()*.00015)*14);galaxyGroup.rotation.y+=dt*.012;const pulse=1+Math.sin(performance.now()*.003)*.06;beamGlow.scale.x=beamGlow.scale.z=pulse;renderer.render(scene,camera)}animate();
 })();
 </script>
 </body>
