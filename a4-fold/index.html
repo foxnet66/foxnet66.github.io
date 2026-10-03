@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>A4 对折100次</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#eee9e0;color:#181818}.app{min-height:100svh;display:flex;flex-direction:column}.hero{padding:18px 18px 10px}h1{margin:0;font-size:34px;letter-spacing:-1.5px}.sub{margin:7px 0 0;color:#666;font-size:13px}.stage{margin:8px 14px 0;height:46svh;min-height:330px;border-radius:24px;overflow:hidden;position:relative;background:linear-gradient(#f4efe7,#ddd4c6);box-shadow:0 12px 35px #0002;transition:.45s}.stars{position:absolute;inset:0;opacity:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:38px 38px;transition:.4s}.ref{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}.obj{filter:drop-shadow(0 12px 20px #0003)}.hair{width:2px;height:220px;background:#2a211c;transform:rotate(15deg)}.coin{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff4b0,#c79c24 55%,#745814)}.book{width:190px;height:120px;border-radius:8px 16px 16px 8px;background:#3563b3;transform:rotate(-7deg)}.human{width:60px;height:240px;position:relative}.human:before{content:"";position:absolute;width:48px;height:48px;border-radius:50%;background:#202020;left:6px}.human:after{content:"";position:absolute;width:60px;height:178px;border-radius:30px 30px 15px 15px;background:#202020;top:58px}.building{position:absolute;bottom:0;width:140px;height:300px;background:linear-gradient(90deg,#666f7d,#b1b7c0)}.mountain{position:absolute;bottom:-10px;border-left:210px solid transparent;border-right:210px solid transparent;border-bottom:330px solid #747e84}.earth{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8ce6ff,#2677bb 45%,#163e62)}.sun{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#fff7ae,#ffc94b 50%,#e68b20 72%,transparent 74%);box-shadow:0 0 70px #ffbd3caa}.galaxy{width:330px;height:150px;border-radius:50%;background:radial-gradient(ellipse,#fff 0 4%,#aebaff 10%,#6554b8aa 35%,transparent 70%);transform:rotate(-16deg)}
+.paper{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:210px;height:297px;background:linear-gradient(120deg,#fff,#efede6);border:1px solid #0002;box-shadow:0 16px 35px #0003;transition:.38s;z-index:2}.badge{position:absolute;left:14px;top:14px;z-index:3;background:#ffffffdc;padding:8px 11px;border-radius:999px;font-weight:800;font-size:13px}.refLabel{position:absolute;left:14px;bottom:14px;z-index:3;background:#171717df;color:#fff;padding:10px 12px;border-radius:13px;max-width:75%;font-size:12px;line-height:1.35}.panel{padding:14px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}.card{background:#ffffffc9;border:1px solid #0001;border-radius:17px;padding:12px}.card small{color:#777;display:block}.card strong{display:block;margin-top:4px;font-size:19px;line-height:1.1;word-break:break-word}.wide{grid-column:1/-1;background:#202020;color:#fff}.wide small{color:#aaa}.controls{margin-top:12px}.slider{width:100%;accent-color:#ff604b}.btns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}button{border:0;border-radius:15px;padding:14px 10px;font-size:15px;font-weight:800}.reset{background:#fff}.fold{background:#ff604b;color:#fff}.auto{width:100%;margin-top:9px;background:#4c72ff;color:#fff}.warning{font-size:11px;color:#666;text-align:center;margin-top:10px}.pulse{animation:p .35s}@keyframes p{50%{transform:translate(-50%,-50%) scale(.92) rotateY(8deg)}}@media(min-width:800px){.app{max-width:760px;margin:auto}.stage{height:520px}}
+</style>
+</head>
+<body>
+<div class="app">
+ <div class="hero"><h1>A4 对折 100 次</h1><div class="sub">从真实 80gsm A4 纸约 0.10 mm 厚开始，每折一次厚度 ×2。</div></div>
+ <div class="stage" id="stage">
+  <div class="stars" id="stars"></div><div class="ref" id="ref"></div>
+  <div class="badge">第 <span id="n">0</span> 次</div>
+  <div class="paper" id="paper"></div>
+  <div class="refLabel" id="refLabel">参照：一根头发 · 约 0.05–0.10 mm</div>
+ </div>
+ <div class="panel">
+  <div class="stats">
+   <div class="card"><small>理论厚度</small><strong id="thick">0.10 mm</strong></div>
+   <div class="card"><small>纸层数</small><strong id="layers">1 层</strong></div>
+   <div class="card wide"><small>现在有多夸张？</small><strong id="compare">还只是一张普通 A4 纸。</strong></div>
+  </div>
+  <div class="controls">
+   <input class="slider" id="slider" type="range" min="0" max="100" value="0">
+   <div class="btns"><button class="reset" id="reset">重新开始</button><button class="fold" id="fold">对折一次</button></div>
+   <button class="auto" id="auto">自动折到 100 次</button>
+   <div class="warning">第 7 次以后属于数学理想模拟；现实中的普通 A4 纸已极难继续折。</div>
+  </div>
+ </div>
+</div>
+<script>
+let f=0,t=null;
+const $=id=>document.getElementById(id),paper=$("paper"),stage=$("stage"),ref=$("ref"),stars=$("stars");
+const LY=9.4607e15,MOON=384400000,AU=149597870700;
+function fmt(mm){let m=mm/1000;if(mm<10)return mm.toLocaleString("zh-CN",{maximumFractionDigits:4})+" mm";if(m<1000)return m.toLocaleString("zh-CN",{maximumFractionDigits:3})+" m";if(m<1e9)return (m/1000).toLocaleString("zh-CN",{maximumFractionDigits:3})+" km";if(m<LY)return (m/1e9).toLocaleString("zh-CN",{maximumFractionDigits:3})+" 百万 km";return (m/LY).toExponential(3)+" 光年"}
+function scene(m,mm){let o,b,l,s=false;if(mm<.25){o="hair";b="linear-gradient(#f4efe7,#ddd4c6)";l="参照：一根头发 · 约 0.05–0.10 mm"}else if(mm<3){o="coin";b="linear-gradient(#f8efd1,#d3c089)";l="参照：一枚硬币 · 约 2 mm"}else if(m<.4){o="book";b="linear-gradient(#eee9df,#c8b89d)";l="参照：一本书 · 几厘米"}else if(m<3){o="human";b="linear-gradient(#dcefff,#cbdcc0)";l="参照：成年人 · 约 1.7 m"}else if(m<500){o="building";b="linear-gradient(#beddf5 0 65%,#c9c4b6 65%)";l="参照：高楼 · 数十至数百米"}else if(m<15000){o="mountain";b="linear-gradient(#9fc2dc,#dbe3e6)";l="参照：珠穆朗玛峰 · 8,849 m"}else if(m<AU){o="earth";b="radial-gradient(circle,#173252,#030712 75%)";l=m<MOON?"参照：地球 / 月球":"已超过地月距离";s=true}else if(m<LY){o="sun";b="radial-gradient(circle,#17233c,#02040b 75%)";l="参照：太阳系 · 地日距离约 1.496 亿 km";s=true}else{o="galaxy";b="radial-gradient(circle,#1d2346,#020309 75%)";l="参照：银河系 · 直径约 10 万光年";s=true}stage.style.background=b;stars.style.opacity=s?".85":"0";ref.innerHTML='<div class="obj '+o+'"></div>';$("refLabel").textContent=l}
+function cmp(m){if(m<.001)return"仍在毫米级。";if(m<.03)return"已经是硬币/卡片厚度。";if(m<.4)return"接近一本书。";if(m<3)return"接近人的身高。";if(m<100)return"进入建筑尺度。";if(m<8849)return"正在逼近珠穆朗玛峰。";if(m<MOON)return"进入行星尺度。";if(m<AU)return"已经超过地月距离。";if(m<LY)return"超过地日距离，进入太阳系尺度。";let x=m/LY;if(x<1e5)return"约 "+x.toLocaleString("zh-CN",{maximumFractionDigits:2})+" 光年，进入银河系尺度。";if(x<1e9)return"约 "+(x/1e6).toFixed(2)+" 百万光年。";return"约 "+(x/1e9).toFixed(2)+" 十亿光年，达到宇宙级尺度。"}
+function draw(anim=true){let layers=2**f,mm=.1*layers,m=mm/1000;$("n").textContent=f;$("thick").textContent=fmt(mm);$("layers").textContent=f<53?Math.round(layers).toLocaleString("zh-CN")+" 层":layers.toExponential(3)+" 层";$("compare").textContent=cmp(m);$("slider").value=f;scene(m,mm);let v=Math.min(f,12),w=210,h=297;for(let i=1;i<=v;i++)i%2?h/=2:w/=2;w=Math.max(48,w);h=Math.max(48,h);paper.style.width=w+"px";paper.style.height=h+"px";paper.style.boxShadow="0 16px "+(35+Math.min(70,f))+"px #0005";if(anim){paper.classList.remove("pulse");void paper.offsetWidth;paper.classList.add("pulse")}$("fold").disabled=f>=100;$("auto").textContent=t?"停止自动演示":"自动折到 100 次"}
+function set(n,a=true){f=Math.max(0,Math.min(100,+n));draw(a)}
+$("fold").onclick=()=>set(f+1);$("reset").onclick=()=>{clearInterval(t);t=null;set(0)};$("slider").oninput=e=>{clearInterval(t);t=null;set(e.target.value,false)};$("auto").onclick=()=>{if(t){clearInterval(t);t=null;draw(false);return}if(f>=100)f=0;t=setInterval(()=>{f++;draw();if(f>=100){clearInterval(t);t=null;draw(false)}},150);draw(false)};draw(false);
+</script>
+</body></html>
