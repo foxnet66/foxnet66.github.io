@@ -12,9 +12,15 @@
 .top{position:absolute;left:16px;right:16px;top:max(16px,env(safe-area-inset-top));z-index:4;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
 .brand{max-width:68%}.brand h1{margin:0;font-size:26px;line-height:1;letter-spacing:-1px;text-shadow:0 2px 18px #000}.brand p{margin:7px 0 0;color:#e6e7ec;font-size:12px;text-shadow:0 2px 12px #000}
 .foldBadge{background:rgba(255,255,255,.9);color:#111;padding:9px 12px;border-radius:999px;font-size:13px;font-weight:900;box-shadow:0 8px 24px #0004}
-.scaleTag{position:absolute;left:16px;bottom:218px;z-index:4;background:rgba(7,8,12,.76);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:15px;padding:10px 13px;max-width:78%;font-size:12px;line-height:1.4;box-shadow:0 12px 35px #0005}
+.scaleTag{position:absolute;left:16px;bottom:285px;z-index:4;background:rgba(7,8,12,.76);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:15px;padding:10px 13px;max-width:78%;font-size:12px;line-height:1.4;box-shadow:0 12px 35px #0005}
 .scaleTag b{font-size:15px}
-.panel{position:absolute;z-index:5;left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(16,18,25,.80),rgba(12,14,20,.94));border:1px solid var(--line);border-radius:24px;padding:12px;backdrop-filter:blur(18px);box-shadow:0 -20px 60px #0005}
+.panel{position:absolute;z-index:5;left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(16,18,25,.78),rgba(12,14,20,.94));border:1px solid var(--line);border-radius:22px;padding:10px;backdrop-filter:blur(18px);box-shadow:0 -18px 55px #0005;transition:transform .28s ease,max-height .28s ease,padding .28s ease}
+.panel.collapsed{padding:8px 10px}
+.panel.collapsed .stats,.panel.collapsed input,.panel.collapsed .btns,.panel.collapsed .auto,.panel.collapsed .tip{display:none}
+.panelHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.panelHead b{font-size:13px}
+.panelToggle{border:0;background:rgba(255,255,255,.10);color:#fff;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800}
+.panel.collapsed .panelHead{margin-bottom:0}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:10px 11px}.stat small{color:var(--muted);display:block;font-size:11px}.stat strong{display:block;margin-top:3px;font-size:18px;line-height:1.1;word-break:break-word}.compare{grid-column:1/-1}.compare strong{font-size:15px}
 input[type=range]{width:100%;accent-color:var(--red);margin:11px 0 5px}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{border:0;border-radius:14px;padding:12px 8px;font-weight:900;font-size:14px}.reset{background:#f4f4f7;color:#111}.fold{background:var(--red);color:white}.auto{width:100%;margin-top:8px;background:var(--blue);color:#fff}
@@ -32,7 +38,8 @@ input[type=range]{width:100%;accent-color:var(--red);margin:11px 0 5px}
     <div class="foldBadge">第 <span id="foldN">0</span> 次</div>
   </div>
   <div class="scaleTag" id="scaleTag"><b>桌面尺度</b><br>真实 A4 纸从桌面开始。</div>
-  <div class="panel">
+  <div class="panel" id="panel">
+    <div class="panelHead"><b>参数</b><button class="panelToggle" id="panelToggle">收起</button></div>
     <div class="stats">
       <div class="stat"><small>理论厚度</small><strong id="thick">0.10 mm</strong></div>
       <div class="stat"><small>纸层数</small><strong id="layers">1 层</strong></div>
@@ -196,6 +203,21 @@ document.getElementById('fold').onclick=()=>setFold(folds+1);
 document.getElementById('reset').onclick=()=>{clearInterval(timer);timer=null;setFold(0);document.getElementById('auto').textContent='自动折到 100 次'};
 document.getElementById('slider').oninput=e=>{clearInterval(timer);timer=null;setFold(e.target.value,false);document.getElementById('auto').textContent='自动折到 100 次'};
 document.getElementById('auto').onclick=()=>{if(timer){clearInterval(timer);timer=null;document.getElementById('auto').textContent='自动折到 100 次';return}if(folds>=100)folds=0;document.getElementById('auto').textContent='停止自动演示';timer=setInterval(()=>{setFold(folds+1,false);if(folds>=100){clearInterval(timer);timer=null;document.getElementById('auto').textContent='自动折到 100 次'}},170)};
+
+const panel=document.getElementById('panel');
+const panelToggle=document.getElementById('panelToggle');
+const scaleTag=document.getElementById('scaleTag');
+function syncPanel(){
+  const h=panel.getBoundingClientRect().height;
+  scaleTag.style.bottom=(h+18)+'px';
+}
+panelToggle.onclick=()=>{
+  panel.classList.toggle('collapsed');
+  panelToggle.textContent=panel.classList.contains('collapsed')?'展开':'收起';
+  requestAnimationFrame(syncPanel);
+};
+new ResizeObserver(syncPanel).observe(panel);
+syncPanel();
 
 function resize(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();
 updateScene();camera.position.copy(targetCam);
