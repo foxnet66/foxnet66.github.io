@@ -25,6 +25,12 @@
 input[type=range]{width:100%;accent-color:var(--red);margin:11px 0 5px}
 .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{border:0;border-radius:14px;padding:12px 8px;font-weight:900;font-size:14px}.reset{background:#f4f4f7;color:#111}.fold{background:var(--red);color:white}.auto{width:100%;margin-top:8px;background:var(--blue);color:#fff}
 .tip{text-align:center;color:#9ca2af;font-size:10px;margin-top:8px}
+.screenRuler{position:absolute;z-index:3;left:50%;top:120px;bottom:300px;width:64px;transform:translateX(-50%);pointer-events:none;display:none;align-items:center;justify-content:center}
+.screenRuler.show{display:flex}
+.screenRulerLine{position:absolute;left:50%;top:8%;bottom:8%;width:6px;transform:translateX(-50%);border-radius:999px;background:linear-gradient(180deg,#fff,#dce5ff 45%,#fff);box-shadow:0 0 10px #fff,0 0 28px #7994ff}
+.screenRulerCap{position:absolute;left:50%;width:18px;height:18px;transform:translateX(-50%);border-radius:50%;background:#fff;box-shadow:0 0 16px #9db0ff}
+.topCap{top:6%}.bottomCap{bottom:6%}
+.screenRulerText{position:absolute;right:44px;top:50%;transform:translateY(-50%);white-space:nowrap;background:rgba(8,10,16,.80);border:1px solid rgba(255,255,255,.14);padding:7px 9px;border-radius:10px;font-size:11px;font-weight:800}
 .flash{position:absolute;inset:0;z-index:3;pointer-events:none;background:white;opacity:0}.flash.on{animation:flash .28s}@keyframes flash{0%{opacity:0}.35%{opacity:.10}100%{opacity:0}}
 @media(min-width:760px){#app{max-width:540px;margin:auto;border-left:1px solid #ffffff10;border-right:1px solid #ffffff10}.brand h1{font-size:30px}}
 </style>
@@ -32,6 +38,12 @@ input[type=range]{width:100%;accent-color:var(--red);margin:11px 0 5px}
 <body>
 <div id="app">
   <div id="scene"></div>
+  <div class="screenRuler" id="screenRuler">
+    <div class="screenRulerLine"></div>
+    <div class="screenRulerCap topCap"></div>
+    <div class="screenRulerCap bottomCap"></div>
+    <div class="screenRulerText" id="screenRulerText">理论厚度</div>
+  </div>
   <div class="flash" id="flash"></div>
   <div class="top">
     <div class="brand"><h1>A4 对折 100 次</h1><p>0.10 mm 起步 · 数值按指数精确计算</p></div>
@@ -268,6 +280,14 @@ function updateScene(){
  if(stage===6){targetCam.set(12,8,28);camLook.set(0,4.0,0)}
  if(stage===7){targetCam.set(0,6.5,26);camLook.set(0,5.0,0)}
  if(stage>=8){targetCam.set(0,8.5,34);camLook.set(0,8.0,0)}
+ const screenRuler=document.getElementById('screenRuler');
+ const screenRulerText=document.getElementById('screenRulerText');
+ if(folds>8){
+   screenRuler.classList.add('show');
+   screenRulerText.textContent='理论厚度 · '+fmt(mm);
+ }else{
+   screenRuler.classList.remove('show');
+ }
  document.getElementById('fold').disabled=folds>=100;
 }
 function setFold(n,flash=true){folds=Math.max(0,Math.min(100,+n));updateScene();if(flash){const f=document.getElementById('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}}
@@ -282,6 +302,8 @@ const scaleTag=document.getElementById('scaleTag');
 function syncPanel(){
   const h=panel.getBoundingClientRect().height;
   scaleTag.style.bottom=(h+18)+'px';
+  const sr=document.getElementById('screenRuler');
+  if(sr) sr.style.bottom=(h+34)+'px';
 }
 panelToggle.onclick=()=>{
   panel.classList.toggle('collapsed');
