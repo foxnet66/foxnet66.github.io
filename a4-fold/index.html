@@ -120,6 +120,13 @@ galaxyGroup.rotation.x=.18;galaxyGroup.rotation.z=-.18;galaxyGroup.visible=false
 
 // symbolic cosmic paper stack + reference markers
 const cosmicGroup=new THREE.Group();world.add(cosmicGroup);cosmicGroup.visible=false;
+const rulerGroup=new THREE.Group();world.add(rulerGroup);rulerGroup.visible=false;
+const rulerLine=mesh(new THREE.CylinderGeometry(.055,.055,10,20),new THREE.MeshBasicMaterial({color:0xffffff}),rulerGroup);
+rulerLine.position.y=5;
+const rulerGlow=mesh(new THREE.CylinderGeometry(.20,.20,10,20),new THREE.MeshBasicMaterial({color:0x90a7ff,transparent:true,opacity:.12,depthWrite:false}),rulerGroup);
+rulerGlow.position.y=5;
+const rulerCap1=mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}),rulerGroup);rulerCap1.position.y=0;
+const rulerCap2=mesh(new THREE.SphereGeometry(.18,20,20),new THREE.MeshBasicMaterial({color:0xffffff}),rulerGroup);rulerCap2.position.y=10;
 const beamMat=new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.95});
 const beam=mesh(new THREE.BoxGeometry(.65,12,.65),beamMat,cosmicGroup);beam.position.y=0;
 const beamGlow=mesh(new THREE.BoxGeometry(1.5,12,1.5),new THREE.MeshBasicMaterial({color:0x90a5ff,transparent:true,opacity:.12,depthWrite:false}),cosmicGroup);
@@ -139,7 +146,15 @@ paperGlow.position.y=.02;
 const edgeLines=new THREE.LineSegments(new THREE.EdgesGeometry(paper.geometry),new THREE.LineBasicMaterial({color:0xc5c0b6}));paper.add(edgeLines);
 
 const labels={
-0:['桌面尺度','真实 A4 纸从桌面开始。'],1:['毫米尺度','硬币厚度大约 2 mm。'],2:['书本尺度','已经接近一本书的厚度。'],3:['细柱阶段','纸面已经非常小，厚度开始主导外形。'],4:['城市尺度','现在更像一根不断变长的细柱。'],5:['地球尺度','白色细柱代表理论纸堆厚度。'],6:['太阳系尺度','纸堆在视觉上已经接近一条尺度线。'],7:['银河系尺度','现在只能用光年来描述。'],8:['宇宙尺度','继续翻倍，尺度迅速失去日常直觉。']};
+0:['真实折纸阶段','前 1–8 次重点看纸张本身：面积减半、厚度翻倍。'],
+1:['硬币参照','厚度开始接近硬币和卡片。'],
+2:['书本参照','厚度已经达到几厘米。'],
+3:['人体 / 房间参照','纸面很小，厚度开始明显超过底面。'],
+4:['高楼 / 珠峰参照','从这里开始，用“尺度线”比看纸块更直观。'],
+5:['地球 / 月球参照','用地球直径和地月距离理解厚度。'],
+6:['太阳系参照','用地日距离作为尺度尺。'],
+7:['恒星际 / 银河系参照','厚度开始用光年来描述。'],
+8:['宇宙尺度','数值继续指数增长，已经超出日常空间直觉。']};
 
 let folds=0,timer=null,targetCam=new THREE.Vector3(),camLook=new THREE.Vector3(),stage=0;
 const PAPER_MM=.1,LY=9.4607e15,MOON=384400000,AU=149597870700;
@@ -148,13 +163,13 @@ function getStage(m,mm){if(mm<3)return mm<.4?0:1;if(m<.4)return 2;if(m<3)return 
 function compare(m,mm){if(mm<.4)return '仍是一张很薄的纸。';if(mm<3)return '接近一枚硬币的厚度。';if(m<.4)return '接近一本书。';if(m<3)return '接近人的身高。';if(m<100)return '进入建筑尺度。';if(m<8849)return '正在逼近珠穆朗玛峰。';if(m<MOON)return '进入行星尺度。';if(m<AU)return '已经超过地月距离。';if(m<LY)return '超过地日距离，进入太阳系尺度。';const x=m/LY;if(x<1e5)return '约 '+x.toLocaleString('zh-CN',{maximumFractionDigits:2})+' 光年。';if(x<1e9)return '约 '+(x/1e6).toFixed(2)+' 百万光年。';return '约 '+(x/1e9).toFixed(2)+' 十亿光年。'}
 
 function updateVisibility(s){
- [localGroup,cityGroup,earthGroup,solarGroup,galaxyGroup,cosmicGroup].forEach(g=>g.visible=false);
+ [localGroup,cityGroup,earthGroup,solarGroup,galaxyGroup,cosmicGroup,rulerGroup].forEach(g=>g.visible=false);
  if(s<=3)localGroup.visible=true;
- else if(s===4)cityGroup.visible=true;
- else if(s===5)earthGroup.visible=true;
- else if(s===6)solarGroup.visible=true;
- else if(s===7){galaxyGroup.visible=true;cosmicGroup.visible=true}
- else {galaxyGroup.visible=true;cosmicGroup.visible=true}
+ else if(s===4){cityGroup.visible=true;rulerGroup.visible=true}
+ else if(s===5){earthGroup.visible=true;rulerGroup.visible=true}
+ else if(s===6){solarGroup.visible=true;rulerGroup.visible=true}
+ else if(s===7){galaxyGroup.visible=true;cosmicGroup.visible=true;rulerGroup.visible=true}
+ else {galaxyGroup.visible=true;cosmicGroup.visible=true;rulerGroup.visible=true}
 }
 function updateScene(){
  const layers=2**folds,mm=PAPER_MM*layers,m=mm/1000;
@@ -165,8 +180,27 @@ function updateScene(){
  document.getElementById('compare').textContent=compare(m,mm);
  document.getElementById('slider').value=folds;
  let L=labels[stage];
- if(stage===7) L=['恒星际尺度','白色光柱代表纸堆理论厚度；两颗亮星用于表现数光年的距离。'];
- if(stage>=8) L=['银河系尺度','白色光柱代表纸堆理论厚度；背景亮盘代表银河系尺度。'];
+ if(folds<=8){
+   L=['真实折纸阶段','第 '+folds+' 次：纸面继续减半，厚度继续翻倍。'];
+ }else if(m<3){
+   L=['人体参照','白色尺度线 = 当前理论厚度；和人的身高做比较。'];
+ }else if(m<8849){
+   L=['高楼参照','白色尺度线 = 当前理论厚度；进入建筑尺度。'];
+ }else if(m<4e7){
+   L=['珠穆朗玛峰参照','珠峰约 8.8 km；厚度开始进入地理尺度。'];
+ }else if(m<MOON){
+   L=['地球参照','地球周长约 4 万 km；白线表示纸堆理论厚度。'];
+ }else if(m<AU){
+   L=['地月参照','地月平均距离约 38.44 万 km。'];
+ }else if(m<LY){
+   L=['太阳系参照','地日距离约 1.496 亿 km。'];
+ }else if(m<4.24*LY){
+   L=['最近恒星参照','太阳到比邻星约 4.24 光年。'];
+ }else if(m<1e5*LY){
+   L=['银河系参照','银河系直径约 10 万光年。'];
+ }else{
+   L=['宇宙尺度','白色尺度线只用于可视化，真实比例已无法直接放进屏幕。'];
+ }
  document.getElementById('scaleTag').innerHTML='<b>'+L[0]+'</b><br>'+L[1];
 
  // Idealized geometry:
@@ -194,8 +228,20 @@ function updateScene(){
  paper.position.y=visualThickness/2;
  paperGlow.scale.set((vw/2.16)*1.18,(visualThickness/.034)*1.03,(vd/3.03)*1.18);
  paperGlow.position.y=visualThickness/2;
- paperGroup.visible=stage<=6;
- paperGroup.scale.setScalar(stage===4?.24:(stage>=5?.22:1));
+ paperGroup.visible=folds<=8;
+ paperGroup.scale.setScalar(1);
+
+ // After fold 8, switch from "paper object" to a clear symbolic scale line.
+ if(folds>8){
+   rulerGroup.visible=true;
+   const lineVisual = Math.min(18, 3.6 + Math.max(0,Math.log10(Math.max(mm,1)))*1.15);
+   rulerLine.scale.y=lineVisual/10;
+   rulerGlow.scale.y=lineVisual/10;
+   rulerLine.position.y=lineVisual/2;
+   rulerGlow.position.y=lineVisual/2;
+   rulerCap1.position.y=0;
+   rulerCap2.position.y=lineVisual;
+ }
 
  // In cosmic stages the white beam is a symbolic "paper thickness" ruler.
  if(stage>=7){
@@ -211,11 +257,11 @@ function updateScene(){
  if(stage===1){targetCam.set(0,3.0,5.4);camLook.set(0,.18,0)}
  if(stage===2){targetCam.set(0,3.6,6.2);camLook.set(0,.45,0)}
  if(stage===3){targetCam.set(0,5.2,8.2);camLook.set(0,1.2,0)}
- if(stage===4){targetCam.set(0,14,24);camLook.set(0,2.0,0)}
- if(stage===5){targetCam.set(0,7,19);camLook.set(0,1.6,0)}
- if(stage===6){targetCam.set(0,10,30);camLook.set(0,2.2,0)}
- if(stage===7){targetCam.set(0,4.5,24);camLook.set(0,0,0)}
- if(stage>=8){targetCam.set(0,8,34);camLook.set(0,0,0)}
+ if(stage===4){targetCam.set(8,9,20);camLook.set(0,3.2,0)}
+ if(stage===5){targetCam.set(10,6,22);camLook.set(0,3.5,0)}
+ if(stage===6){targetCam.set(12,8,28);camLook.set(0,4.0,0)}
+ if(stage===7){targetCam.set(10,7,28);camLook.set(0,4.0,0)}
+ if(stage>=8){targetCam.set(12,10,34);camLook.set(0,4.5,0)}
  document.getElementById('fold').disabled=folds>=100;
 }
 function setFold(n,flash=true){folds=Math.max(0,Math.min(100,+n));updateScene();if(flash){const f=document.getElementById('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}}
@@ -242,7 +288,7 @@ syncPanel();
 function resize(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();
 updateScene();camera.position.copy(targetCam);
 const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const dt=Math.min(.05,clock.getDelta());camera.position.lerp(targetCam,1-Math.pow(.0005,dt));camera.lookAt(camLook);coin.rotation.z+=dt*.18;earth.rotation.y+=dt*.08;tinyEarth.position.set(Math.cos(performance.now()*.00015)*14,0,Math.sin(performance.now()*.00015)*14);galaxyGroup.rotation.y+=dt*.012;const pulse=1+Math.sin(performance.now()*.003)*.06;beamGlow.scale.x=beamGlow.scale.z=pulse;renderer.render(scene,camera)}animate();
+function animate(){requestAnimationFrame(animate);const dt=Math.min(.05,clock.getDelta());camera.position.lerp(targetCam,1-Math.pow(.0005,dt));camera.lookAt(camLook);coin.rotation.z+=dt*.18;earth.rotation.y+=dt*.08;tinyEarth.position.set(Math.cos(performance.now()*.00015)*14,0,Math.sin(performance.now()*.00015)*14);galaxyGroup.rotation.y+=dt*.012;const pulse=1+Math.sin(performance.now()*.003)*.06;beamGlow.scale.x=beamGlow.scale.z=pulse;rulerGlow.scale.x=rulerGlow.scale.z=pulse;renderer.render(scene,camera)}animate();
 })();
 </script>
 </body>
