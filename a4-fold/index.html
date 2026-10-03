@@ -116,7 +116,7 @@ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float
 const galPts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xd9e0ff,size:.16,sizeAttenuation:true,transparent:true,opacity:1}));galaxyGroup.add(galPts);
 const core=mesh(new THREE.SphereGeometry(3.0,40,40),new THREE.MeshBasicMaterial({color:0xfff0b0,transparent:true,opacity:.82}),galaxyGroup);
 const galGlow=mesh(new THREE.SphereGeometry(7,40,40),new THREE.MeshBasicMaterial({color:0x6f78ff,transparent:true,opacity:.10,depthWrite:false}),galaxyGroup);
-galaxyGroup.rotation.x=.18;galaxyGroup.rotation.z=-.18;galaxyGroup.visible=false;
+galaxyGroup.rotation.x=.18;galaxyGroup.rotation.z=-.18;galaxyGroup.scale.setScalar(.72);galaxyGroup.visible=false;
 
 // symbolic cosmic paper stack + reference markers
 const cosmicGroup=new THREE.Group();world.add(cosmicGroup);cosmicGroup.visible=false;
@@ -234,21 +234,27 @@ function updateScene(){
  // After fold 8, switch from "paper object" to a clear symbolic scale line.
  if(folds>8){
    rulerGroup.visible=true;
-   const lineVisual = Math.min(18, 3.6 + Math.max(0,Math.log10(Math.max(mm,1)))*1.15);
+   const lineVisual = Math.min(13.5, 3.6 + Math.max(0,Math.log10(Math.max(mm,1)))*.82);
+   rulerGroup.position.set(0,0,0);
+   rulerGroup.rotation.set(0,0,0);
    rulerLine.scale.y=lineVisual/10;
    rulerGlow.scale.y=lineVisual/10;
-   rulerLine.position.y=lineVisual/2;
-   rulerGlow.position.y=lineVisual/2;
-   rulerCap1.position.y=0;
-   rulerCap2.position.y=lineVisual;
+   rulerLine.position.set(0,lineVisual/2,0);
+   rulerGlow.position.set(0,lineVisual/2,0);
+   rulerCap1.position.set(0,0,0);
+   rulerCap2.position.set(0,lineVisual,0);
+   if(stage>=8){
+     targetCam.set(0,lineVisual/2,30);
+     camLook.set(0,lineVisual/2,0);
+   }
  }
 
  // In cosmic stages the white beam is a symbolic "paper thickness" ruler.
  if(stage>=7){
    cosmicGroup.visible=true;
-   const cosmicLen = stage===7 ? 10 : 16;
-   beam.scale.y = cosmicLen/12;
-   beamGlow.scale.y = cosmicLen/12;
+   // The earlier "beam" is redundant once scale-line mode is active.
+   beam.visible=false;
+   beamGlow.visible=false;
    starA.visible=starB.visible=starGlowA.visible=starGlowB.visible=(stage===7);
  }
 
@@ -260,8 +266,8 @@ function updateScene(){
  if(stage===4){targetCam.set(8,9,20);camLook.set(0,3.2,0)}
  if(stage===5){targetCam.set(10,6,22);camLook.set(0,3.5,0)}
  if(stage===6){targetCam.set(12,8,28);camLook.set(0,4.0,0)}
- if(stage===7){targetCam.set(10,7,28);camLook.set(0,4.0,0)}
- if(stage>=8){targetCam.set(12,10,34);camLook.set(0,4.5,0)}
+ if(stage===7){targetCam.set(0,6.5,26);camLook.set(0,5.0,0)}
+ if(stage>=8){targetCam.set(0,8.5,34);camLook.set(0,8.0,0)}
  document.getElementById('fold').disabled=folds>=100;
 }
 function setFold(n,flash=true){folds=Math.max(0,Math.min(100,+n));updateScene();if(flash){const f=document.getElementById('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}}
