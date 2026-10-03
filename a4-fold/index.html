@@ -134,10 +134,12 @@ const paperMat=mat(0xfaf8f1,.72,.02);
 const edgeMat=mat(0xd9d5cb,.88,0);
 const paper=mesh(new THREE.BoxGeometry(2.1,.03,2.97),paperMat,paperGroup);
 paper.position.y=.02;
+const paperGlow=mesh(new THREE.BoxGeometry(2.16,.034,3.03),new THREE.MeshBasicMaterial({color:0xcfd9ff,transparent:true,opacity:.12,depthWrite:false}),paperGroup);
+paperGlow.position.y=.02;
 const edgeLines=new THREE.LineSegments(new THREE.EdgesGeometry(paper.geometry),new THREE.LineBasicMaterial({color:0xc5c0b6}));paper.add(edgeLines);
 
 const labels={
-0:['桌面尺度','真实 A4 纸从桌面开始。'],1:['毫米尺度','硬币厚度大约 2 mm。'],2:['书本尺度','已经接近一本书的厚度。'],3:['人体尺度','开始超过人的身高。'],4:['城市尺度','厚度进入高楼、城市尺度。'],5:['地球尺度','从城市继续拉远到整个地球。'],6:['太阳系尺度','厚度跨越地月、地日距离。'],7:['银河系尺度','现在只能用光年来描述。'],8:['宇宙尺度','继续翻倍，尺度迅速失去日常直觉。']};
+0:['桌面尺度','真实 A4 纸从桌面开始。'],1:['毫米尺度','硬币厚度大约 2 mm。'],2:['书本尺度','已经接近一本书的厚度。'],3:['细柱阶段','纸面已经非常小，厚度开始主导外形。'],4:['城市尺度','现在更像一根不断变长的细柱。'],5:['地球尺度','白色细柱代表理论纸堆厚度。'],6:['太阳系尺度','纸堆在视觉上已经接近一条尺度线。'],7:['银河系尺度','现在只能用光年来描述。'],8:['宇宙尺度','继续翻倍，尺度迅速失去日常直觉。']};
 
 let folds=0,timer=null,targetCam=new THREE.Vector3(),camLook=new THREE.Vector3(),stage=0;
 const PAPER_MM=.1,LY=9.4607e15,MOON=384400000,AU=149597870700;
@@ -167,15 +169,33 @@ function updateScene(){
  if(stage>=8) L=['银河系尺度','白色光柱代表纸堆理论厚度；背景亮盘代表银河系尺度。'];
  document.getElementById('scaleTag').innerHTML='<b>'+L[0]+'</b><br>'+L[1];
 
- // physical folding footprint for first folds; logarithmic thickness afterwards
+ // Idealized geometry:
+ // each fold halves one footprint dimension and doubles thickness.
+ // We continue the footprint reduction beyond the visually foldable range,
+ // but clamp only for renderability. The aspect therefore evolves:
+ // sheet -> block -> tall pillar -> near-line.
  let w=2.1,d=2.97;
- for(let i=1;i<=Math.min(folds,12);i++){if(i%2)d/=2;else w/=2}
- w=Math.max(.34,w);d=Math.max(.34,d);
- const visualThickness=.03+Math.min(2.6,Math.log10(1+mm)*.34);
- paper.scale.set(w/2.1,visualThickness/.03,d/2.97);
+ for(let i=1;i<=folds;i++){if(i%2)d/=2;else w/=2}
+
+ // Real proportions become astronomically extreme very quickly, so the 3D view uses
+ // logarithmic compression while preserving the trend.
+ const footprintReal=Math.sqrt(Math.max(w*d,1e-30));
+ const fpVisual=Math.max(.045, 0.58*Math.pow(Math.max(footprintReal,1e-18),.22));
+ const ratio=w/d;
+ let vw=fpVisual*Math.sqrt(Math.max(ratio,.12));
+ let vd=fpVisual/Math.sqrt(Math.max(ratio,.12));
+ vw=Math.max(.035,Math.min(2.1,vw));
+ vd=Math.max(.035,Math.min(2.97,vd));
+
+ // Thickness grows exponentially in reality, but logarithmically in the camera view.
+ // After ~10 folds this intentionally overtakes the footprint and becomes line-like.
+ const visualThickness=Math.max(.03, Math.min(18, .03 + Math.pow(Math.log10(1+mm),1.32)*.58));
+ paper.scale.set(vw/2.1,visualThickness/.03,vd/2.97);
  paper.position.y=visualThickness/2;
+ paperGlow.scale.set((vw/2.16)*1.18,(visualThickness/.034)*1.03,(vd/3.03)*1.18);
+ paperGlow.position.y=visualThickness/2;
  paperGroup.visible=stage<=6;
- paperGroup.scale.setScalar(stage===4?.22:(stage>=5?.18:1));
+ paperGroup.scale.setScalar(stage===4?.24:(stage>=5?.22:1));
 
  // In cosmic stages the white beam is a symbolic "paper thickness" ruler.
  if(stage>=7){
@@ -188,12 +208,12 @@ function updateScene(){
 
  // camera choreography
  if(stage===0){targetCam.set(0,3.25,6.3);camLook.set(0,0,0)}
- if(stage===1){targetCam.set(0,3.0,5.4);camLook.set(0,.05,0)}
- if(stage===2){targetCam.set(0,3.4,6.0);camLook.set(0,.1,0)}
- if(stage===3){targetCam.set(0,4.2,7.2);camLook.set(0,.3,0)}
- if(stage===4){targetCam.set(0,15,23);camLook.set(0,1,0)}
- if(stage===5){targetCam.set(0,5.5,17);camLook.set(0,0,0)}
- if(stage===6){targetCam.set(0,8,28);camLook.set(0,0,0)}
+ if(stage===1){targetCam.set(0,3.0,5.4);camLook.set(0,.18,0)}
+ if(stage===2){targetCam.set(0,3.6,6.2);camLook.set(0,.45,0)}
+ if(stage===3){targetCam.set(0,5.2,8.2);camLook.set(0,1.2,0)}
+ if(stage===4){targetCam.set(0,14,24);camLook.set(0,2.0,0)}
+ if(stage===5){targetCam.set(0,7,19);camLook.set(0,1.6,0)}
+ if(stage===6){targetCam.set(0,10,30);camLook.set(0,2.2,0)}
  if(stage===7){targetCam.set(0,4.5,24);camLook.set(0,0,0)}
  if(stage>=8){targetCam.set(0,8,34);camLook.set(0,0,0)}
  document.getElementById('fold').disabled=folds>=100;
