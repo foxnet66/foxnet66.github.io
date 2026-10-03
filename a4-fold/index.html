@@ -3,44 +3,180 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>A4 对折100次</title>
+<title>A4 对折 100 次 · 3D</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#eee9e0;color:#181818}.app{min-height:100svh;display:flex;flex-direction:column}.hero{padding:18px 18px 10px}h1{margin:0;font-size:34px;letter-spacing:-1.5px}.sub{margin:7px 0 0;color:#666;font-size:13px}.stage{margin:8px 14px 0;height:46svh;min-height:330px;border-radius:24px;overflow:hidden;position:relative;background:linear-gradient(#f4efe7,#ddd4c6);box-shadow:0 12px 35px #0002;transition:.45s}.stars{position:absolute;inset:0;opacity:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:38px 38px;transition:.4s}.ref{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}.obj{filter:drop-shadow(0 12px 20px #0003)}.hair{width:2px;height:220px;background:#2a211c;transform:rotate(15deg)}.coin{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff4b0,#c79c24 55%,#745814)}.book{width:190px;height:120px;border-radius:8px 16px 16px 8px;background:#3563b3;transform:rotate(-7deg)}.human{width:60px;height:240px;position:relative}.human:before{content:"";position:absolute;width:48px;height:48px;border-radius:50%;background:#202020;left:6px}.human:after{content:"";position:absolute;width:60px;height:178px;border-radius:30px 30px 15px 15px;background:#202020;top:58px}.building{position:absolute;bottom:0;width:140px;height:300px;background:linear-gradient(90deg,#666f7d,#b1b7c0)}.mountain{position:absolute;bottom:-10px;border-left:210px solid transparent;border-right:210px solid transparent;border-bottom:330px solid #747e84}.earth{width:180px;height:180px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#8ce6ff,#2677bb 45%,#163e62)}.sun{width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#fff7ae,#ffc94b 50%,#e68b20 72%,transparent 74%);box-shadow:0 0 70px #ffbd3caa}.galaxy{width:330px;height:150px;border-radius:50%;background:radial-gradient(ellipse,#fff 0 4%,#aebaff 10%,#6554b8aa 35%,transparent 70%);transform:rotate(-16deg)}
-.paper{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:210px;height:297px;background:linear-gradient(120deg,#fff,#efede6);border:1px solid #0002;box-shadow:0 16px 35px #0003;transition:.38s;z-index:2}.badge{position:absolute;left:14px;top:14px;z-index:3;background:#ffffffdc;padding:8px 11px;border-radius:999px;font-weight:800;font-size:13px}.refLabel{position:absolute;left:14px;bottom:14px;z-index:3;background:#171717df;color:#fff;padding:10px 12px;border-radius:13px;max-width:75%;font-size:12px;line-height:1.35}.panel{padding:14px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}.card{background:#ffffffc9;border:1px solid #0001;border-radius:17px;padding:12px}.card small{color:#777;display:block}.card strong{display:block;margin-top:4px;font-size:19px;line-height:1.1;word-break:break-word}.wide{grid-column:1/-1;background:#202020;color:#fff}.wide small{color:#aaa}.controls{margin-top:12px}.slider{width:100%;accent-color:#ff604b}.btns{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}button{border:0;border-radius:15px;padding:14px 10px;font-size:15px;font-weight:800}.reset{background:#fff}.fold{background:#ff604b;color:#fff}.auto{width:100%;margin-top:9px;background:#4c72ff;color:#fff}.warning{font-size:11px;color:#666;text-align:center;margin-top:10px}.pulse{animation:p .35s}@keyframes p{50%{transform:translate(-50%,-50%) scale(.92) rotateY(8deg)}}@media(min-width:800px){.app{max-width:760px;margin:auto}.stage{height:520px}}
+:root{--bg:#090b12;--card:rgba(18,20,28,.82);--line:rgba(255,255,255,.12);--text:#f6f7fb;--muted:#a8acb8;--red:#ff5e4d;--blue:#5c79ff}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text);overflow:hidden}
+#app{height:100svh;display:flex;flex-direction:column;position:relative;background:#0a0c12}
+#scene{position:absolute;inset:0;z-index:0}
+.top{position:absolute;left:16px;right:16px;top:max(16px,env(safe-area-inset-top));z-index:4;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
+.brand{max-width:68%}.brand h1{margin:0;font-size:26px;line-height:1;letter-spacing:-1px;text-shadow:0 2px 18px #000}.brand p{margin:7px 0 0;color:#e6e7ec;font-size:12px;text-shadow:0 2px 12px #000}
+.foldBadge{background:rgba(255,255,255,.9);color:#111;padding:9px 12px;border-radius:999px;font-size:13px;font-weight:900;box-shadow:0 8px 24px #0004}
+.scaleTag{position:absolute;left:16px;bottom:218px;z-index:4;background:rgba(7,8,12,.76);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:15px;padding:10px 13px;max-width:78%;font-size:12px;line-height:1.4;box-shadow:0 12px 35px #0005}
+.scaleTag b{font-size:15px}
+.panel{position:absolute;z-index:5;left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(16,18,25,.80),rgba(12,14,20,.94));border:1px solid var(--line);border-radius:24px;padding:12px;backdrop-filter:blur(18px);box-shadow:0 -20px 60px #0005}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:10px 11px}.stat small{color:var(--muted);display:block;font-size:11px}.stat strong{display:block;margin-top:3px;font-size:18px;line-height:1.1;word-break:break-word}.compare{grid-column:1/-1}.compare strong{font-size:15px}
+input[type=range]{width:100%;accent-color:var(--red);margin:11px 0 5px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.btn{border:0;border-radius:14px;padding:12px 8px;font-weight:900;font-size:14px}.reset{background:#f4f4f7;color:#111}.fold{background:var(--red);color:white}.auto{width:100%;margin-top:8px;background:var(--blue);color:#fff}
+.tip{text-align:center;color:#9ca2af;font-size:10px;margin-top:8px}
+.flash{position:absolute;inset:0;z-index:3;pointer-events:none;background:white;opacity:0}.flash.on{animation:flash .28s}@keyframes flash{0%{opacity:0}.35%{opacity:.10}100%{opacity:0}}
+@media(min-width:760px){#app{max-width:540px;margin:auto;border-left:1px solid #ffffff10;border-right:1px solid #ffffff10}.brand h1{font-size:30px}}
 </style>
 </head>
 <body>
-<div class="app">
- <div class="hero"><h1>A4 对折 100 次</h1><div class="sub">从真实 80gsm A4 纸约 0.10 mm 厚开始，每折一次厚度 ×2。</div></div>
- <div class="stage" id="stage">
-  <div class="stars" id="stars"></div><div class="ref" id="ref"></div>
-  <div class="badge">第 <span id="n">0</span> 次</div>
-  <div class="paper" id="paper"></div>
-  <div class="refLabel" id="refLabel">参照：一根头发 · 约 0.05–0.10 mm</div>
- </div>
- <div class="panel">
-  <div class="stats">
-   <div class="card"><small>理论厚度</small><strong id="thick">0.10 mm</strong></div>
-   <div class="card"><small>纸层数</small><strong id="layers">1 层</strong></div>
-   <div class="card wide"><small>现在有多夸张？</small><strong id="compare">还只是一张普通 A4 纸。</strong></div>
+<div id="app">
+  <div id="scene"></div>
+  <div class="flash" id="flash"></div>
+  <div class="top">
+    <div class="brand"><h1>A4 对折 100 次</h1><p>0.10 mm 起步 · 数值按指数精确计算</p></div>
+    <div class="foldBadge">第 <span id="foldN">0</span> 次</div>
   </div>
-  <div class="controls">
-   <input class="slider" id="slider" type="range" min="0" max="100" value="0">
-   <div class="btns"><button class="reset" id="reset">重新开始</button><button class="fold" id="fold">对折一次</button></div>
-   <button class="auto" id="auto">自动折到 100 次</button>
-   <div class="warning">第 7 次以后属于数学理想模拟；现实中的普通 A4 纸已极难继续折。</div>
+  <div class="scaleTag" id="scaleTag"><b>桌面尺度</b><br>真实 A4 纸从桌面开始。</div>
+  <div class="panel">
+    <div class="stats">
+      <div class="stat"><small>理论厚度</small><strong id="thick">0.10 mm</strong></div>
+      <div class="stat"><small>纸层数</small><strong id="layers">1 层</strong></div>
+      <div class="stat compare"><small>现在相当于</small><strong id="compare">一张普通 A4 纸。</strong></div>
+    </div>
+    <input id="slider" type="range" min="0" max="100" value="0">
+    <div class="btns">
+      <button class="btn reset" id="reset">重新开始</button>
+      <button class="btn fold" id="fold">对折一次</button>
+    </div>
+    <button class="btn auto" id="auto">自动折到 100 次</button>
+    <div class="tip">第 7 次以后属于数学理想模型；3D 镜头使用对数尺度展示。</div>
   </div>
- </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"></script>
 <script>
-let f=0,t=null;
-const $=id=>document.getElementById(id),paper=$("paper"),stage=$("stage"),ref=$("ref"),stars=$("stars");
-const LY=9.4607e15,MOON=384400000,AU=149597870700;
-function fmt(mm){let m=mm/1000;if(mm<10)return mm.toLocaleString("zh-CN",{maximumFractionDigits:4})+" mm";if(m<1000)return m.toLocaleString("zh-CN",{maximumFractionDigits:3})+" m";if(m<1e9)return (m/1000).toLocaleString("zh-CN",{maximumFractionDigits:3})+" km";if(m<LY)return (m/1e9).toLocaleString("zh-CN",{maximumFractionDigits:3})+" 百万 km";return (m/LY).toExponential(3)+" 光年"}
-function scene(m,mm){let o,b,l,s=false;if(mm<.25){o="hair";b="linear-gradient(#f4efe7,#ddd4c6)";l="参照：一根头发 · 约 0.05–0.10 mm"}else if(mm<3){o="coin";b="linear-gradient(#f8efd1,#d3c089)";l="参照：一枚硬币 · 约 2 mm"}else if(m<.4){o="book";b="linear-gradient(#eee9df,#c8b89d)";l="参照：一本书 · 几厘米"}else if(m<3){o="human";b="linear-gradient(#dcefff,#cbdcc0)";l="参照：成年人 · 约 1.7 m"}else if(m<500){o="building";b="linear-gradient(#beddf5 0 65%,#c9c4b6 65%)";l="参照：高楼 · 数十至数百米"}else if(m<15000){o="mountain";b="linear-gradient(#9fc2dc,#dbe3e6)";l="参照：珠穆朗玛峰 · 8,849 m"}else if(m<AU){o="earth";b="radial-gradient(circle,#173252,#030712 75%)";l=m<MOON?"参照：地球 / 月球":"已超过地月距离";s=true}else if(m<LY){o="sun";b="radial-gradient(circle,#17233c,#02040b 75%)";l="参照：太阳系 · 地日距离约 1.496 亿 km";s=true}else{o="galaxy";b="radial-gradient(circle,#1d2346,#020309 75%)";l="参照：银河系 · 直径约 10 万光年";s=true}stage.style.background=b;stars.style.opacity=s?".85":"0";ref.innerHTML='<div class="obj '+o+'"></div>';$("refLabel").textContent=l}
-function cmp(m){if(m<.001)return"仍在毫米级。";if(m<.03)return"已经是硬币/卡片厚度。";if(m<.4)return"接近一本书。";if(m<3)return"接近人的身高。";if(m<100)return"进入建筑尺度。";if(m<8849)return"正在逼近珠穆朗玛峰。";if(m<MOON)return"进入行星尺度。";if(m<AU)return"已经超过地月距离。";if(m<LY)return"超过地日距离，进入太阳系尺度。";let x=m/LY;if(x<1e5)return"约 "+x.toLocaleString("zh-CN",{maximumFractionDigits:2})+" 光年，进入银河系尺度。";if(x<1e9)return"约 "+(x/1e6).toFixed(2)+" 百万光年。";return"约 "+(x/1e9).toFixed(2)+" 十亿光年，达到宇宙级尺度。"}
-function draw(anim=true){let layers=2**f,mm=.1*layers,m=mm/1000;$("n").textContent=f;$("thick").textContent=fmt(mm);$("layers").textContent=f<53?Math.round(layers).toLocaleString("zh-CN")+" 层":layers.toExponential(3)+" 层";$("compare").textContent=cmp(m);$("slider").value=f;scene(m,mm);let v=Math.min(f,12),w=210,h=297;for(let i=1;i<=v;i++)i%2?h/=2:w/=2;w=Math.max(48,w);h=Math.max(48,h);paper.style.width=w+"px";paper.style.height=h+"px";paper.style.boxShadow="0 16px "+(35+Math.min(70,f))+"px #0005";if(anim){paper.classList.remove("pulse");void paper.offsetWidth;paper.classList.add("pulse")}$("fold").disabled=f>=100;$("auto").textContent=t?"停止自动演示":"自动折到 100 次"}
-function set(n,a=true){f=Math.max(0,Math.min(100,+n));draw(a)}
-$("fold").onclick=()=>set(f+1);$("reset").onclick=()=>{clearInterval(t);t=null;set(0)};$("slider").oninput=e=>{clearInterval(t);t=null;set(e.target.value,false)};$("auto").onclick=()=>{if(t){clearInterval(t);t=null;draw(false);return}if(f>=100)f=0;t=setInterval(()=>{f++;draw();if(f>=100){clearInterval(t);t=null;draw(false)}},150);draw(false)};draw(false);
+(()=>{
+const THREE=window.THREE;
+if(!THREE){document.getElementById('scene').innerHTML='<div style="padding:120px 20px">3D 引擎加载失败，请刷新页面。</div>';return}
+const host=document.getElementById('scene');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x10131a);
+scene.fog=new THREE.FogExp2(0x10131a,.010);
+const camera=new THREE.PerspectiveCamera(48,1,.01,2e7);
+camera.position.set(0,3.2,6.2);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+host.appendChild(renderer.domElement);
+
+const hemi=new THREE.HemisphereLight(0xcfe7ff,0x342b24,2.4); scene.add(hemi);
+const key=new THREE.DirectionalLight(0xffffff,3.6); key.position.set(4,8,5);key.castShadow=true;scene.add(key);
+const warm=new THREE.PointLight(0xffc36a,8,20);warm.position.set(-3,2,2);scene.add(warm);
+
+const world=new THREE.Group();scene.add(world);
+const localGroup=new THREE.Group(), cityGroup=new THREE.Group(), earthGroup=new THREE.Group(), solarGroup=new THREE.Group(), galaxyGroup=new THREE.Group();
+world.add(localGroup,cityGroup,earthGroup,solarGroup,galaxyGroup);
+
+function mat(c,rough=.65,metal=.05){return new THREE.MeshStandardMaterial({color:c,roughness:rough,metalness:metal})}
+function mesh(g,m,group=world){const o=new THREE.Mesh(g,m);o.castShadow=o.receiveShadow=true;group.add(o);return o}
+
+// local scene
+const table=mesh(new THREE.BoxGeometry(8,.25,8),mat(0x9d704d,.8),localGroup);table.position.y=-.22;
+const coin=mesh(new THREE.CylinderGeometry(.46,.46,.08,64),mat(0xd6ad35,.32,.65),localGroup);coin.rotation.x=Math.PI/2;coin.position.set(1.65,.10,.15);
+const book=mesh(new THREE.BoxGeometry(1.5,.22,2.05),mat(0x315f9f,.55),localGroup);book.position.set(-1.75,.12,.6);book.rotation.y=.16;
+const mug=mesh(new THREE.CylinderGeometry(.45,.48,.85,32),mat(0xe8e3da,.55),localGroup);mug.position.set(2.1,.42,-1.35);
+
+// city
+const ground=mesh(new THREE.CircleGeometry(250,64),mat(0x4c5157,.96),cityGroup);ground.rotation.x=-Math.PI/2;ground.position.y=-2;
+for(let i=0;i<38;i++){const a=i*.73,r=18+(i%7)*18,h=6+(i%9)*5;const b=mesh(new THREE.BoxGeometry(5+(i%3)*2,h,5+(i%4)),mat(0x77808c,.74),cityGroup);b.position.set(Math.cos(a)*r,h/2-2,Math.sin(a)*r)}
+cityGroup.scale.setScalar(.07);cityGroup.visible=false;
+
+// earth/moon
+const earth=mesh(new THREE.SphereGeometry(4,64,64),new THREE.MeshStandardMaterial({color:0x2b83c6,roughness:.72,metalness:0}),earthGroup);
+const landMat=new THREE.MeshStandardMaterial({color:0x4e9d62,roughness:.9});
+for(let i=0;i<12;i++){const land=mesh(new THREE.SphereGeometry(.45+.12*(i%3),24,16),landMat,earthGroup);const a=i*.83,b=.6*Math.sin(i*1.7);land.position.set(4.03*Math.cos(b)*Math.cos(a),4.03*Math.sin(b),4.03*Math.cos(b)*Math.sin(a));land.scale.set(1.8,.35,.8);land.lookAt(0,0,0)}
+const moon=mesh(new THREE.SphereGeometry(1.08,40,40),mat(0xbebdb9,.96),earthGroup);moon.position.set(12,2,-2);
+earthGroup.visible=false;
+
+// sun + orbit
+const sunMat=new THREE.MeshBasicMaterial({color:0xffb126});
+const sun=mesh(new THREE.SphereGeometry(3.2,64,64),sunMat,solarGroup);
+const sunLight=new THREE.PointLight(0xffc45b,75,160);solarGroup.add(sunLight);
+const orbit=new THREE.Mesh(new THREE.TorusGeometry(14,.025,8,180),new THREE.MeshBasicMaterial({color:0x8194bd,transparent:true,opacity:.45}));orbit.rotation.x=Math.PI/2;solarGroup.add(orbit);
+const tinyEarth=mesh(new THREE.SphereGeometry(.34,24,24),mat(0x3188cc,.7),solarGroup);tinyEarth.position.x=14;
+solarGroup.visible=false;
+
+// galaxy points
+const pts=[];for(let i=0;i<7000;i++){const arm=i%4;const r=Math.pow(Math.random(),.62)*28;const angle=r*.43+arm*Math.PI/2+(Math.random()-.5)*.7;const y=(Math.random()-.5)*Math.max(.25,2.1-r*.055);pts.push(Math.cos(angle)*r,y,Math.sin(angle)*r)}
+const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pts,3));
+const galPts=new THREE.Points(geo,new THREE.PointsMaterial({color:0xbec7ff,size:.09,sizeAttenuation:true,transparent:true,opacity:.88}));galaxyGroup.add(galPts);
+const core=mesh(new THREE.SphereGeometry(2.2,32,32),new THREE.MeshBasicMaterial({color:0xfff1c2,transparent:true,opacity:.55}),galaxyGroup);
+galaxyGroup.rotation.x=.42;galaxyGroup.rotation.z=-.18;galaxyGroup.visible=false;
+
+// paper stack
+const paperGroup=new THREE.Group();world.add(paperGroup);
+const paperMat=mat(0xfaf8f1,.72,.02);
+const edgeMat=mat(0xd9d5cb,.88,0);
+const paper=mesh(new THREE.BoxGeometry(2.1,.03,2.97),paperMat,paperGroup);
+paper.position.y=.02;
+const edgeLines=new THREE.LineSegments(new THREE.EdgesGeometry(paper.geometry),new THREE.LineBasicMaterial({color:0xc5c0b6}));paper.add(edgeLines);
+
+const labels={
+0:['桌面尺度','真实 A4 纸从桌面开始。'],1:['毫米尺度','硬币厚度大约 2 mm。'],2:['书本尺度','已经接近一本书的厚度。'],3:['人体尺度','开始超过人的身高。'],4:['城市尺度','厚度进入高楼、城市尺度。'],5:['地球尺度','从城市继续拉远到整个地球。'],6:['太阳系尺度','厚度跨越地月、地日距离。'],7:['银河系尺度','现在只能用光年来描述。'],8:['宇宙尺度','继续翻倍，尺度迅速失去日常直觉。']};
+
+let folds=0,timer=null,targetCam=new THREE.Vector3(),camLook=new THREE.Vector3(),stage=0;
+const PAPER_MM=.1,LY=9.4607e15,MOON=384400000,AU=149597870700;
+function fmt(mm){const m=mm/1000;if(mm<10)return mm.toLocaleString('zh-CN',{maximumFractionDigits:4})+' mm';if(m<1000)return m.toLocaleString('zh-CN',{maximumFractionDigits:3})+' m';if(m<1e9)return (m/1000).toLocaleString('zh-CN',{maximumFractionDigits:3})+' km';if(m<LY)return (m/1e9).toLocaleString('zh-CN',{maximumFractionDigits:3})+' 百万 km';return (m/LY).toExponential(3)+' 光年'}
+function getStage(m,mm){if(mm<3)return mm<.4?0:1;if(m<.4)return 2;if(m<3)return 3;if(m<15000)return 4;if(m<AU)return 5;if(m<LY)return 6;if(m<1e5*LY)return 7;return 8}
+function compare(m,mm){if(mm<.4)return '仍是一张很薄的纸。';if(mm<3)return '接近一枚硬币的厚度。';if(m<.4)return '接近一本书。';if(m<3)return '接近人的身高。';if(m<100)return '进入建筑尺度。';if(m<8849)return '正在逼近珠穆朗玛峰。';if(m<MOON)return '进入行星尺度。';if(m<AU)return '已经超过地月距离。';if(m<LY)return '超过地日距离，进入太阳系尺度。';const x=m/LY;if(x<1e5)return '约 '+x.toLocaleString('zh-CN',{maximumFractionDigits:2})+' 光年。';if(x<1e9)return '约 '+(x/1e6).toFixed(2)+' 百万光年。';return '约 '+(x/1e9).toFixed(2)+' 十亿光年。'}
+
+function updateVisibility(s){
+ [localGroup,cityGroup,earthGroup,solarGroup,galaxyGroup].forEach(g=>g.visible=false);
+ if(s<=3)localGroup.visible=true;
+ else if(s===4)cityGroup.visible=true;
+ else if(s===5)earthGroup.visible=true;
+ else if(s===6)solarGroup.visible=true;
+ else galaxyGroup.visible=true;
+}
+function updateScene(){
+ const layers=2**folds,mm=PAPER_MM*layers,m=mm/1000;
+ stage=getStage(m,mm);updateVisibility(stage);
+ document.getElementById('foldN').textContent=folds;
+ document.getElementById('thick').textContent=fmt(mm);
+ document.getElementById('layers').textContent=folds<53?Math.round(layers).toLocaleString('zh-CN')+' 层':layers.toExponential(3)+' 层';
+ document.getElementById('compare').textContent=compare(m,mm);
+ document.getElementById('slider').value=folds;
+ const L=labels[stage];document.getElementById('scaleTag').innerHTML='<b>'+L[0]+'</b><br>'+L[1];
+
+ // physical folding footprint for first folds; logarithmic thickness afterwards
+ let w=2.1,d=2.97;
+ for(let i=1;i<=Math.min(folds,12);i++){if(i%2)d/=2;else w/=2}
+ w=Math.max(.34,w);d=Math.max(.34,d);
+ const visualThickness=.03+Math.min(2.6,Math.log10(1+mm)*.34);
+ paper.scale.set(w/2.1,visualThickness/.03,d/2.97);
+ paper.position.y=visualThickness/2;
+ paperGroup.visible=stage<=4;
+ paperGroup.scale.setScalar(stage===4?.22:1);
+
+ // camera choreography
+ if(stage===0){targetCam.set(0,3.25,6.3);camLook.set(0,0,0)}
+ if(stage===1){targetCam.set(0,3.0,5.4);camLook.set(0,.05,0)}
+ if(stage===2){targetCam.set(0,3.4,6.0);camLook.set(0,.1,0)}
+ if(stage===3){targetCam.set(0,4.2,7.2);camLook.set(0,.3,0)}
+ if(stage===4){targetCam.set(0,15,23);camLook.set(0,1,0)}
+ if(stage===5){targetCam.set(0,5.5,17);camLook.set(0,0,0)}
+ if(stage===6){targetCam.set(0,8,28);camLook.set(0,0,0)}
+ if(stage>=7){targetCam.set(0,23,42);camLook.set(0,0,0)}
+ document.getElementById('fold').disabled=folds>=100;
+}
+function setFold(n,flash=true){folds=Math.max(0,Math.min(100,+n));updateScene();if(flash){const f=document.getElementById('flash');f.classList.remove('on');void f.offsetWidth;f.classList.add('on')}}
+document.getElementById('fold').onclick=()=>setFold(folds+1);
+document.getElementById('reset').onclick=()=>{clearInterval(timer);timer=null;setFold(0);document.getElementById('auto').textContent='自动折到 100 次'};
+document.getElementById('slider').oninput=e=>{clearInterval(timer);timer=null;setFold(e.target.value,false);document.getElementById('auto').textContent='自动折到 100 次'};
+document.getElementById('auto').onclick=()=>{if(timer){clearInterval(timer);timer=null;document.getElementById('auto').textContent='自动折到 100 次';return}if(folds>=100)folds=0;document.getElementById('auto').textContent='停止自动演示';timer=setInterval(()=>{setFold(folds+1,false);if(folds>=100){clearInterval(timer);timer=null;document.getElementById('auto').textContent='自动折到 100 次'}},170)};
+
+function resize(){const w=host.clientWidth,h=host.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}addEventListener('resize',resize);resize();
+updateScene();camera.position.copy(targetCam);
+const clock=new THREE.Clock();
+function animate(){requestAnimationFrame(animate);const dt=Math.min(.05,clock.getDelta());camera.position.lerp(targetCam,1-Math.pow(.0005,dt));camera.lookAt(camLook);coin.rotation.z+=dt*.18;earth.rotation.y+=dt*.08;tinyEarth.position.set(Math.cos(performance.now()*.00015)*14,0,Math.sin(performance.now()*.00015)*14);galaxyGroup.rotation.y+=dt*.018;renderer.render(scene,camera)}animate();
+})();
 </script>
-</body></html>
+</body>
+</html>
